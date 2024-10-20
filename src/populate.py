@@ -5,18 +5,14 @@ from transformers import AutoTokenizer, AutoModel
 from datasets import load_dataset
 from pinecone import Pinecone, ServerlessSpec
 
-# Load environment variables
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 
-# Initialize Pinecone
 pc = Pinecone(api_key=PINECONE_API_KEY)
 
-# Define the index configuration
 index_name = 'financial-rag-index'
-dimension = 768  # Dimension of your embedding model
-metric = 'cosine'  # Using cosine similarity
+dimension = 768  
+metric = 'cosine'  
 
-# Check if the index already exists, if not, create a new one
 if index_name not in pc.list_indexes().names():
     pc.create_index(
         name=index_name,
@@ -28,10 +24,8 @@ if index_name not in pc.list_indexes().names():
         )
     )
 
-# Connect to the index
 index = pc.Index(index_name)
 
-# Load the embedding model
 tokenizer = AutoTokenizer.from_pretrained("sujet-ai/Marsilia-Embeddings-FR-Base")
 model = AutoModel.from_pretrained("sujet-ai/Marsilia-Embeddings-FR-Base")
 
@@ -50,13 +44,11 @@ def chunk_text(text, max_length=512, overlap=50):
         chunks.append(chunk)
     return chunks
 
-# Load the dataset
 dataset = load_dataset('sujet-ai/Sujet-Financial-RAG-FR-Dataset', split='train').select(range(150))  # Limiting to first 150 entries for example
 
 batch = []
-batch_size = 100  # Adjust batch size based on your memory and network capacity
+batch_size = 100  
 
-# Process and upload data
 for item in dataset:
     query = item["question"]
     context = item["context"]
@@ -65,15 +57,15 @@ for item in dataset:
     for chunk in context_chunks:
         combined_text = query + " " + chunk
         combined_embed = embed(combined_text)
-        unique_id = str(uuid.uuid4())  # Use a random UUID for the vector ID
+        unique_id = str(uuid.uuid4())  
         metadata = {"text": combined_text}
         batch.append((unique_id, combined_embed, metadata))
 
         if len(batch) >= batch_size:
             index.upsert(vectors=batch)
-            batch = []  # Clear batch after upsert
+            batch = []  
 
 if batch:
-    index.upsert(vectors=batch)  # Upsert any remaining vectors
+    index.upsert(vectors=batch)  
 
 print("Data has been uploaded to Pinecone index.")
