@@ -4,9 +4,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
 def load_dynamic_keywords():
-    """
-    Load and extract the most common words from the dataset's questions and context fields.
-    """
+    
     dataset = load_dataset("sujet-ai/Sujet-Financial-RAG-FR-Dataset", split="train[:200]")
     # Extract and process question keywords
     all_questions = " ".join(dataset['question'])

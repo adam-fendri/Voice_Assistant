@@ -30,13 +30,11 @@ tokenizer = AutoTokenizer.from_pretrained("sujet-ai/Marsilia-Embeddings-FR-Base"
 model = AutoModel.from_pretrained("sujet-ai/Marsilia-Embeddings-FR-Base")
 
 def embed(text):
-    """Embeds the input text with the Marsilia model."""
     inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
     outputs = model(**inputs)
     return outputs.last_hidden_state.mean(dim=1).squeeze().tolist()
 
 def chunk_text(text, max_length=512, overlap=50):
-    """Splits the text into chunks for embedding."""
     words = text.split()
     chunks = []
     for i in range(0, len(words), max_length - overlap):
@@ -49,6 +47,7 @@ dataset = load_dataset('sujet-ai/Sujet-Financial-RAG-FR-Dataset', split='train')
 batch = []
 batch_size = 100  
 
+#upsert
 for item in dataset:
     query = item["question"]
     context = item["context"]

@@ -42,8 +42,7 @@ class VoiceAssistant:
                     while self.listening:
                         data = self.stream.read(CHUNK)
                         await ws.send(data)
-
-                        # Silence Detection
+                        #Silence Detection
                         rms = np.sqrt(np.mean(np.frombuffer(data, dtype=np.int16) ** 2))
                         db_level = 20 * np.log10(rms) if rms > 0 else 0
                         if db_level < SILENCE_DB_THRESHOLD:
